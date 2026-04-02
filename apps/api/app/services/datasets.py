@@ -7,6 +7,7 @@ from typing import Any
 
 import pandas as pd
 import httpx
+from sqlalchemy import create_engine
 
 from app.core.config import settings
 from app.utils.stats import dataset_summary
@@ -71,6 +72,34 @@ class DatasetStore:
             "name": name,
             "source": "api",
             "url": url,
+            "created_at": datetime.utcnow().isoformat() + "Z",
+        }
+        with open(paths["meta"], "w", encoding="utf-8") as f:
+            json.dump(meta, f)
+        return meta
+
+    @staticmethod
+    async def from_db(name: str, connection_url: str, sql: str) -> dict:
+        dataset_id = uuid.uuid4().hex
+        paths = DatasetStore._paths(dataset_id)
+
+        q = sql.strip()
+        if not q.lower().startswith("select"):
+            raise ValueError("Only SELECT queries are allowed")
+        if len(q) > 4000:
+            raise ValueError("SQL too long")
+
+        engine = create_engine(connection_url)
+        try:
+            df = pd.read_sql_query(q, engine)
+        finally:
+            engine.dispose()
+
+        df.to_csv(paths["csv"], index=False)
+        meta = {
+            "dataset_id": dataset_id,
+            "name": name,
+            "source": "db",
             "created_at": datetime.utcnow().isoformat() + "Z",
         }
         with open(paths["meta"], "w", encoding="utf-8") as f:

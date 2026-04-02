@@ -1,7 +1,7 @@
 'use client'
 
 import Shell from '@/components/Shell'
-import DragDropUpload from '@/components/collector/DragDropUpload'
+import CollectorHub from '@/components/collector/CollectorHub'
 import DatasetVisual from '@/components/datasets/DatasetVisual'
 import { MotionPage } from '@/components/motion/MotionPage'
 import { useAppStore } from '@/store/useAppStore'
@@ -16,9 +16,9 @@ export default function CollectorPage() {
           <div className="glass-strong neon-border rounded-3xl p-6 shadow-glowHard">
             <div className="text-sm uppercase tracking-[0.28em] text-white/60">Phase 1</div>
             <div className="mt-2 text-3xl font-semibold text-white">The Collector</div>
-            <p className="mt-3 text-white/70">Drag & drop CSV/Excel. You’ll see charts instantly + live pipeline events.</p>
+            <p className="mt-3 text-white/70">Drag & drop, API link, or Database query. Everything becomes visuals.</p>
             <div className="mt-6">
-              <DragDropUpload />
+              <CollectorHub />
             </div>
           </div>
 
@@ -27,7 +27,7 @@ export default function CollectorPage() {
             {datasetId ? (
               <DatasetVisual datasetId={datasetId} />
             ) : (
-              <div className="mt-8 text-white/70">Upload a dataset to materialize the first graphs.</div>
+              <div className="mt-8 text-white/70">Connect a dataset to materialize the first graphs.</div>
             )}
           </div>
         </div>
