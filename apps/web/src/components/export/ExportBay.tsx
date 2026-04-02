@@ -9,7 +9,7 @@ export default function ExportBay() {
   const datasetId = useAppStore(s => s.datasetId)
   const [busy, setBusy] = useState<string | null>(null)
 
-  const dl = async (kind: 'pdf' | 'csv') => {
+  const dl = async (kind: 'pdf' | 'csv' | 'xlsx') => {
     if (!datasetId) return
     setBusy(kind)
     try {
@@ -23,7 +23,7 @@ export default function ExportBay() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = kind === 'pdf' ? 'neonforge-report.pdf' : 'neonforge-export.csv'
+      a.download = kind === 'pdf' ? 'neonforge-report.pdf' : kind === 'xlsx' ? 'neonforge-export.xlsx' : 'neonforge-export.csv'
       document.body.appendChild(a)
       a.click()
       a.remove()
@@ -38,17 +38,23 @@ export default function ExportBay() {
       <div className="glass-strong neon-border rounded-3xl p-6 shadow-glowHard">
         <div className="text-sm uppercase tracking-[0.28em] text-white/60">Phase 9</div>
         <div className="mt-2 text-3xl font-semibold text-white">Export Bay</div>
-        <p className="mt-3 text-white/70">Generate PDF reports + export CSV. Everything is server-side, ready for sharing.</p>
+        <p className="mt-3 text-white/70">Generate PDF reports + export CSV/Excel. Everything is server-side, ready for sharing.</p>
 
-        <div className="mt-6 grid grid-cols-1 gap-4">
+        <div className="mt-6 grid grid-cols-1 gap-3">
           <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} disabled={!datasetId || busy === 'pdf'} onClick={() => dl('pdf')}
             className="rounded-2xl px-4 py-3 bg-gradient-to-r from-neon-cyan/80 via-neon-violet/70 to-neon-pink/70 text-black font-semibold shadow-glow disabled:opacity-40">
             {busy === 'pdf' ? 'Forging PDF...' : 'Download PDF'}
           </motion.button>
-          <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} disabled={!datasetId || busy === 'csv'} onClick={() => dl('csv')}
-            className="rounded-2xl px-4 py-3 bg-white/10 border border-white/10 text-white font-semibold shadow-glow disabled:opacity-40">
-            {busy === 'csv' ? 'Forging CSV...' : 'Download CSV'}
-          </motion.button>
+          <div className="grid grid-cols-2 gap-3">
+            <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} disabled={!datasetId || busy === 'csv'} onClick={() => dl('csv')}
+              className="rounded-2xl px-4 py-3 bg-white/10 border border-white/10 text-white font-semibold shadow-glow disabled:opacity-40">
+              {busy === 'csv' ? 'Forging CSV...' : 'CSV'}
+            </motion.button>
+            <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} disabled={!datasetId || busy === 'xlsx'} onClick={() => dl('xlsx')}
+              className="rounded-2xl px-4 py-3 bg-white/10 border border-white/10 text-white font-semibold shadow-glow disabled:opacity-40">
+              {busy === 'xlsx' ? 'Forging XLSX...' : 'Excel'}
+            </motion.button>
+          </div>
         </div>
 
         <div className="mt-6 glass rounded-3xl p-5 border border-white/10">

@@ -18,6 +18,15 @@ async def export_csv(dataset_id: str) -> str:
     return out
 
 
+async def export_xlsx(dataset_id: str) -> str:
+    os.makedirs(settings.artifact_dir, exist_ok=True)
+    out = os.path.join(settings.artifact_dir, f"{dataset_id}.export.xlsx")
+    df = await DatasetStore.load_df(dataset_id)
+    with pd.ExcelWriter(out, engine="openpyxl") as w:
+        df.to_excel(w, index=False, sheet_name="data")
+    return out
+
+
 async def export_pdf(dataset_id: str) -> str:
     os.makedirs(settings.artifact_dir, exist_ok=True)
     out = os.path.join(settings.artifact_dir, f"{dataset_id}.report.pdf")
