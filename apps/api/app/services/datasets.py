@@ -1,6 +1,7 @@
 import os
 import json
 import uuid
+import io
 from datetime import datetime
 from typing import Any
 
@@ -28,7 +29,6 @@ class DatasetStore:
         paths = DatasetStore._paths(dataset_id)
 
         raw = await file.read()
-        # Excel support
         if name.lower().endswith((".xlsx", ".xls")):
             tmp = paths["csv"] + ".xlsx"
             with open(tmp, "wb") as f:
@@ -63,7 +63,7 @@ class DatasetStore:
                 data = r.json()
                 df = pd.json_normalize(data)
             else:
-                df = pd.read_csv(pd.io.common.StringIO(r.text))
+                df = pd.read_csv(io.StringIO(r.text))
 
         df.to_csv(paths["csv"], index=False)
         meta = {

@@ -15,7 +15,7 @@ async def run_simulation(dataset_id: str, scenario_a: dict[str, float], scenario
     X_cols = num_cols[1: min(6, len(num_cols))]
 
     X = df[X_cols].fillna(0)
-    y = df[y_col].fillna(y_col)
+    y = df[y_col].fillna(df[y_col].median() if pd.api.types.is_numeric_dtype(df[y_col]) else 0)
 
     model = LinearRegression().fit(X, y)
 
