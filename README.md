@@ -1,17 +1,30 @@
-# NeonForge AI Platform
+# NeonForge AI Platform (Website)
 
-Cinematic, phase-wise AI data platform.
+A **website** experience (single-page, scroll sections) with a real backend: upload data → watch AI pipeline → get graphs + exports.
 
-## Run (Docker)
+## Run locally (no Docker)
+
+### 1) Start API (FastAPI)
 ```bash
-docker compose up --build
+cd apps/api
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
 ```
 
-- Web: http://localhost:3000
-- API: http://localhost:8000/docs
-
-## Local
+### 2) Start Website (Next.js)
 ```bash
-cd apps/api && python -m venv .venv && .venv\\Scripts\\activate && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8000
-cd ..\\web && npm i && npm run dev
+cd apps/web
+npm i
+npm run dev
+```
+
+Open:
+- Website: http://localhost:3000
+- API docs: http://localhost:8000/docs
+
+## Optional (Docker)
+```bash
+docker compose up --build
 ```
