@@ -12,6 +12,7 @@ from app.core.db import SessionLocal
 from app.services.phases.cleaner import run_cleaner
 from app.services.phases.processor import run_processor
 from app.services.phases.ml import train_models
+from app.services.phases.painter import build_story
 from app.services.phases.insights import generate_insights
 from app.services.phases.export import export_pdf
 
@@ -24,7 +25,6 @@ class JobHub:
     async def attach(self, job_id: str, ws: WebSocket):
         async with self._lock:
             self._sockets.setdefault(job_id, set()).add(ws)
-        # send current job snapshot
         snap = await JobManager.get(job_id)
         await ws.send_text(orjson.dumps({"type": "snapshot", "job": snap}).decode())
         while True:
@@ -106,29 +106,34 @@ class JobManager:
         task = payload.get("task")
         try:
             await JobManager._event(job_id, "info", "collector", "Dataset locked into pipeline", {"dataset_id": ds})
+
             await JobManager._set(job_id, phase="cleaner", progress=0.12)
             clean = await run_cleaner(ds)
-            await JobManager._event(job_id, "info", "cleaner", "Data Surgeon completed", clean)
+            await JobManager._event(job_id, "info", "cleaner", "Data Surgeon completed", {"duplicates_removed": clean.get("duplicates_removed")})
 
             await JobManager._set(job_id, phase="processor", progress=0.28)
             proc = await run_processor(ds)
-            await JobManager._event(job_id, "info", "processor", "Feature Processor completed", proc)
+            await JobManager._event(job_id, "info", "processor", "Feature Processor completed", {"generated": proc.get("generated"), "encoded": proc.get("encoded")})
 
             ml = None
             if target:
                 await JobManager._set(job_id, phase="ml", progress=0.52)
                 ml = await train_models(ds, target, task)
-                await JobManager._event(job_id, "info", "ml", "AI Heart trained", {"metrics": ml.get("metrics"), "best_model": ml.get("best_model")})
+                await JobManager._event(job_id, "info", "ml", "AI Heart trained", {"best_model": ml.get("best_model"), "metrics": ml.get("metrics")})
 
-            await JobManager._set(job_id, phase="insights", progress=0.72)
+            await JobManager._set(job_id, phase="painter", progress=0.64)
+            story = await build_story(ds)
+            await JobManager._event(job_id, "info", "painter", "Painter composed story visuals", {"kpis": story.get("kpis")})
+
+            await JobManager._set(job_id, phase="insights", progress=0.76)
             ins = await generate_insights(ds)
-            await JobManager._event(job_id, "info", "insights", "Oracle insights generated", ins)
+            await JobManager._event(job_id, "info", "insights", "Oracle insights generated", {"count": len(ins.get("insights", []))})
 
-            await JobManager._set(job_id, phase="export", progress=0.88)
+            await JobManager._set(job_id, phase="export", progress=0.90)
             pdf_path = await export_pdf(ds)
             await JobManager._event(job_id, "info", "export", "Report generated", {"pdf": pdf_path})
 
-            result = {"cleaner": clean, "processor": proc, "ml": ml, "insights": ins, "pdf": pdf_path}
+            result = {"cleaner": clean, "processor": proc, "ml": ml, "painter": story, "insights": ins, "pdf": pdf_path}
             await JobManager._set(job_id, status="done", phase="done", progress=1.0, result_json=json.dumps(result))
             await JobManager._event(job_id, "info", "done", "Pipeline complete", {"job_id": job_id})
         except Exception as e:

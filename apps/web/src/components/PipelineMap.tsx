@@ -9,12 +9,10 @@ const phases = [
   { id: 'collector', label: 'Collector' },
   { id: 'cleaner', label: 'Surgeon' },
   { id: 'processor', label: 'Processor' },
-  { id: 'query', label: 'Lens' },
-  { id: 'simulate', label: 'Flux' },
   { id: 'ml', label: 'Heart' },
+  { id: 'painter', label: 'Painter' },
   { id: 'insights', label: 'Oracle' },
   { id: 'export', label: 'Export' },
-  { id: 'logs', label: 'Sentinel' },
 ]
 
 export default function PipelineMap() {
@@ -43,7 +41,7 @@ export default function PipelineMap() {
           <div className="h-full w-1/3 bg-white/30 blur-sm animate-shimmer" />
         </div>
       </div>
-      <div className="grid grid-cols-9 gap-2">
+      <div className={`grid grid-cols-${phases.length} gap-2`}>
         {phases.map((p, i) => {
           const active = i <= activeIndex && (job?.status === 'running' || job?.status === 'done')
           const pulsing = i === activeIndex && job?.status === 'running'

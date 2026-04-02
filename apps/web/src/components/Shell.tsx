@@ -13,6 +13,7 @@ const nav = [
   { href: '/lens', label: 'Lens', tag: 'Phase 4' },
   { href: '/flux', label: 'Flux', tag: 'Phase 5' },
   { href: '/heart', label: 'Heart', tag: 'Phase 6' },
+  { href: '/painter', label: 'Painter', tag: 'Phase 7' },
   { href: '/oracle', label: 'Oracle', tag: 'Phase 8' },
   { href: '/export', label: 'Export', tag: 'Phase 9' },
   { href: '/sentinel', label: 'Sentinel', tag: 'Phase 10' },
